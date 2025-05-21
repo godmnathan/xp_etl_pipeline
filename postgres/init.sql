@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS public.postg_pre (
   valor NUMERIC,
   dt_update TIMESTAMP
 );
+
+TRUNCATE TABLE public.postg_ipca;
+TRUNCATE TABLE public.postg_pre;
