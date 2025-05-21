@@ -1,0 +1,146 @@
+🧼 [1/9] Removing existing connectors (if any)
+➡️ Deleting postg-connector-ipca...
+➡️ Deleting postg-connector-pre...
+➡️ Deleting s3-sink-ipca...
+➡️ Deleting s3-sink-pre...
+🚀 [2/9] Starting containers with Docker Compose...
+⏳ [3/9] Waiting for Kafka Connect to become available (timeout: 60s)
+🛠️ [4/9] Creating PostgreSQL tables if needed...
+CREATE TABLE
+CREATE TABLE
+📄 [5/9] Generating connector config files from templates...
+📦 [6/9] Copying configuration files into the container...
+🔌 [7/9] Registering JDBC source connectors...
+{
+  "name": "postg-connector-ipca",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max": "1",
+    "connection.url": "jdbc:postgresql://postgres:5432/postgres",
+    "connection.user": "postgres",
+    "connection.password": "Jp1987",
+    "mode": "bulk",
+    "table.whitelist": "public.postg_ipca",
+    "topic.prefix": "postgres-",
+    "validate.non.null": "false",
+    "poll.interval.ms": "5000",
+    "name": "postg-connector-ipca"
+  },
+  "tasks": [],
+  "type": "source"
+}
+{
+  "name": "postg-connector-pre",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max": "1",
+    "connection.url": "jdbc:postgresql://postgres:5432/postgres",
+    "connection.user": "postgres",
+    "connection.password": "Jp1987",
+    "mode": "bulk",
+    "table.whitelist": "public.postg_pre",
+    "topic.prefix": "postgres-",
+    "validate.non.null": "false",
+    "poll.interval.ms": "5000",
+    "name": "postg-connector-pre"
+  },
+  "tasks": [],
+  "type": "source"
+}
+☁️ [8/9] Registering S3 Sink connectors...
+{
+  "name": "s3-sink-ipca",
+  "config": {
+    "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+    "tasks.max": "1",
+    "topics": "postgres-postg_ipca",
+    "s3.bucket.name": "xp-etl-pipeline",
+    "s3.region": "us-east-1",
+    "flush.size": "1",
+    "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+    "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "schema.compatibility": "NONE",
+    "topics.dir": "raw/kafka/ipca",
+    "name": "s3-sink-ipca"
+  },
+  "tasks": [],
+  "type": "sink"
+}
+{
+  "name": "s3-sink-pre",
+  "config": {
+    "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+    "tasks.max": "1",
+    "topics": "postgres-postg_pre",
+    "s3.bucket.name": "xp-etl-pipeline",
+    "s3.region": "us-east-1",
+    "flush.size": "1",
+    "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+    "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "schema.compatibility": "NONE",
+    "topics.dir": "raw/kafka/pre",
+    "name": "s3-sink-pre"
+  },
+  "tasks": [],
+  "type": "sink"
+}
+✅ [9/9] Pipeline started successfully. Connectors are active, topics are being monitored, and S3 is ready for ingestion.
+🧾 Logging status of all connectors...
+🔍 Status for postg-connector-ipca:
+{
+  "name": "postg-connector-ipca",
+  "connector": {
+    "state": "RUNNING",
+    "worker_id": "connect:8083"
+  },
+  "tasks": [
+    {
+      "id": 0,
+      "state": "RUNNING",
+      "worker_id": "connect:8083"
+    }
+  ],
+  "type": "source"
+}
+🔍 Status for postg-connector-pre:
+{
+  "name": "postg-connector-pre",
+  "connector": {
+    "state": "RUNNING",
+    "worker_id": "connect:8083"
+  },
+  "tasks": [
+    {
+      "id": 0,
+      "state": "RUNNING",
+      "worker_id": "connect:8083"
+    }
+  ],
+  "type": "source"
+}
+🔍 Status for s3-sink-ipca:
+{
+  "name": "s3-sink-ipca",
+  "connector": {
+    "state": "RUNNING",
+    "worker_id": "connect:8083"
+  },
+  "tasks": [],
+  "type": "sink"
+}
+🔍 Status for s3-sink-pre:
+{
+  "name": "s3-sink-pre",
+  "connector": {
+    "state": "RUNNING",
+    "worker_id": "connect:8083"
+  },
+  "tasks": [],
+  "type": "sink"
+}

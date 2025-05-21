@@ -2,6 +2,9 @@
 
 set -e
 
+# Load environment variables from .env file
+export $(grep -v '^#' .env | xargs)
+
 MAX_WAIT=60
 WAITED=0
 
@@ -33,31 +36,24 @@ done
 
 
 echo "🛠️ [4/9] Creating PostgreSQL tables if needed..."
-docker exec -i postgres psql -U postgres -d postgres <<EOF
-CREATE TABLE IF NOT EXISTS public.postg_ipca (
-  id SERIAL PRIMARY KEY,
-  nome TEXT,
-  valor NUMERIC,
-  dt_update TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS public.postg_pre (
-  id SERIAL PRIMARY KEY,
-  nome TEXT,
-  valor NUMERIC,
-  dt_update TIMESTAMP
-);
-EOF
+docker exec -i postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < postgres/init.sql
 
 
-echo "📦 [5/9] Copying configuration files into the container..."
-docker cp connect_jdbc_postgres_ipca.config connect:/tmp/
-docker cp connect_jdbc_postgres_pre.config connect:/tmp/
-docker cp connect_s3_sink_ipca.config connect:/tmp/
-docker cp connect_s3_sink_pre.config connect:/tmp/
+echo "📄 [5/9] Generating connector config files from templates..."
+envsubst < config/connect_jdbc_postgres_ipca.template > /tmp/connect_jdbc_postgres_ipca.config
+envsubst < config/connect_jdbc_postgres_pre.template  > /tmp/connect_jdbc_postgres_pre.config
+envsubst < config/connect_s3_sink_ipca.template       > /tmp/connect_s3_sink_ipca.config
+envsubst < config/connect_s3_sink_pre.template        > /tmp/connect_s3_sink_pre.config
 
 
-echo "🔌 [6/9] Registering JDBC source connectors..."
+echo "📦 [6/9] Copying configuration files into the container..."
+docker cp /tmp/connect_jdbc_postgres_ipca.config connect:/tmp/
+docker cp /tmp/connect_jdbc_postgres_pre.config  connect:/tmp/
+docker cp /tmp/connect_s3_sink_ipca.config       connect:/tmp/
+docker cp /tmp/connect_s3_sink_pre.config        connect:/tmp/
+
+
+echo "🔌 [7/9] Registering JDBC source connectors..."
 docker exec connect curl -sf -X POST -H "Content-Type: application/json" \
   --data @/tmp/connect_jdbc_postgres_ipca.config \
   http://localhost:8083/connectors | jq
@@ -67,7 +63,7 @@ docker exec connect curl -sf -X POST -H "Content-Type: application/json" \
   http://localhost:8083/connectors | jq
 
 
-echo "☁️ [7/9] Registering S3 Sink connectors..."
+echo "☁️ [8/9] Registering S3 Sink connectors..."
 docker exec connect curl -sf -X POST -H "Content-Type: application/json" \
   --data @/tmp/connect_s3_sink_ipca.config \
   http://localhost:8083/connectors | jq
@@ -77,9 +73,10 @@ docker exec connect curl -sf -X POST -H "Content-Type: application/json" \
   http://localhost:8083/connectors | jq
 
 
-echo "📦 [8/9] (Optional) Listing current files in S3 bucket (xp-etl-pipeline)"
-docker exec connect aws s3 ls s3://xp-etl-pipeline/raw/kafka/ipca/ --recursive || true
-docker exec connect aws s3 ls s3://xp-etl-pipeline/raw/kafka/pre/ --recursive || true
-
-
 echo "✅ [9/9] Pipeline started successfully. Connectors are active, topics are being monitored, and S3 is ready for ingestion."
+
+echo "🧾 Logging status of all connectors..." | tee -a pipeline.log
+for connector in "${CONNECTORS[@]}"; do
+  echo "🔍 Status for $connector:" | tee -a pipeline.log
+  docker exec connect curl -s http://localhost:8083/connectors/$connector/status | jq | tee -a pipeline.log
+done
