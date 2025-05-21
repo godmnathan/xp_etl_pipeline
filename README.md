@@ -4,7 +4,7 @@
 [![Kafka](https://img.shields.io/badge/Kafka-Streaming-black?logo=apachekafka)](https://kafka.apache.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?logo=postgresql)](https://www.postgresql.org/)
 [![AWS S3](https://img.shields.io/badge/AWS-S3-orange?logo=amazon-aws)](https://aws.amazon.com/s3/)
-[![License](https://img.shields.io/github/license/your-username/xp_etl_pipeline?color=green)](LICENSE)
+[![License](https://img.shields.io/github/license/godmnathan/xp_etl_pipeline?color=green)](LICENSE)
 
 This project implements a complete **data pipeline** using:
 
