@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  spark-master:
+    image: bde2020/spark-master:3.3.0-hadoop3.3
+    container_name: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+      - SPARK_MODE=master
+    env_file:
+      - ../.env
+    volumes:
+      - ./jars:/opt/spark/jars
+
+  spark-worker:
+    image: bde2020/spark-worker:3.3.0-hadoop3.3
+    container_name: spark-worker
+    ports:
+      - "8081:8081"
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_MODE=worker
+    env_file:
+      - ../.env
+    depends_on:
+      - spark-master
+    volumes:
+      - ./jars:/opt/spark/jars
+
+  jupyter-notebook:
+    image: jupyter/all-spark-notebook:latest  # <<< IMAGEM CERTA COM JAVA
+    container_name: jupyter-notebook
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./jars:/opt/spark/jars
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    command: start-notebook.sh --NotebookApp.token=''
+    env_file:
+      - ../.env
+    depends_on:
