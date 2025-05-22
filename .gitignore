@@ -1,1 +1,25 @@
+# Arquivos pesados
+*.csv
+*.parquet
+*.json
+*.gz
+*.zip
+*.tar
+
+# Diretórios de dados
+data/
+datasets/
+*.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
 .env
