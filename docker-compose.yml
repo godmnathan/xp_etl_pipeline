@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
 
   postgres:
@@ -72,6 +74,26 @@ services:
       - ./connect/data:/etc/kafka-connect/jars
       - ./connect/s3-sink:/s3-plugins
       - ./.env_kafka_connect:/root/.aws/credentials:ro
+    networks:
+      - kafka_net
+
+  jupyter:
+    build:
+      context: ./jupyter
+    container_name: jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_REGION=${S3_REGION}
+    volumes:
+      - ./notebooks:/home/jovyan/work
     networks:
       - kafka_net
 
