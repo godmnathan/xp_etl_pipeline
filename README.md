@@ -1,4 +1,4 @@
-# 🛠️ XP ETL Pipeline (Kafka + PostgreSQL + S3)
+# 🛠️ XP ETL Pipeline (Kafka + PostgreSQL + S3 + Spark + Docker)
 
 [![Made with Docker](https://img.shields.io/badge/Made%20with-Docker-blue?logo=docker)](https://www.docker.com/)
 [![Kafka](https://img.shields.io/badge/Kafka-Streaming-black?logo=apachekafka)](https://kafka.apache.org/)
